@@ -1,34 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../core/config.dart';
-import '../../core/constant/app_router.dart';
-import '../../core/service/storage_service.dart';
 import '../../data/dummy.dart';
 import '../../providers/onboarding_provider.dart';
 import 'widgets/onboarding_column_dots.dart';
 import 'widgets/onboarding_item.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
-
-  @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
-}
-
-class _OnboardingScreenState extends State<OnboardingScreen> {
-  @override
-  void initState() {
-    redirect();
-    super.initState();
-  }
-
-  void redirect() {
-    if (StorageService.instance.getBool(Config.onboardingSeenKey) == true) {
-      GoRouter.of(context).go(AppRouter.login);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
