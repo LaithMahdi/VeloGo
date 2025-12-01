@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:rent_bike/core/constant/app_style.dart';
 import 'core/config.dart';
-import 'core/constant/app_color.dart';
 import 'core/constant/app_router.dart';
+import 'core/constant/app_theme.dart';
 import 'providers/onboarding_provider.dart';
 
 void main() {
@@ -25,8 +24,9 @@ class MyApp extends StatelessWidget {
           ],
           child: MaterialApp.router(
             title: Config.appName,
-            theme: ,
+            theme: AppTheme.lightTheme,
             routerConfig: AppRouter.router,
+            debugShowCheckedModeBanner: false,
           ),
         );
       },

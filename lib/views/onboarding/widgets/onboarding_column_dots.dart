@@ -22,28 +22,18 @@ class OnboardingColumnDots extends StatelessWidget {
                 OnboardingDotItem(isActive: index == provider.currentPage),
           ),
         ),
-        VerticalSpacer(20),
+        VerticalSpacer(40),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              /// Previous button
               TextButton(
                 onPressed: provider.previousPage,
                 child: const Text("Previous"),
               ),
-
-              /// Next button
               ElevatedButton(
                 onPressed: provider.nextPage,
-                // style: ElevatedButton.styleFrom(
-                //   backgroundColor: AppColor.primary,
-                //   padding: EdgeInsets.symmetric(
-                //     horizontal: 32.w,
-                //     vertical: 14.h,
-                //   ),
-                // ),
                 child: const Text("Next"),
               ),
             ],

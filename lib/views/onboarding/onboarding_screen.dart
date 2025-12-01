@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/dummy.dart';
-import '../../core/constant/app_color.dart';
-import '../../core/constant/app_style.dart';
+
 import '../../providers/onboarding_provider.dart';
-import '../../shared/spacer.dart';
 import 'widgets/onboarding_column_dots.dart';
 import 'widgets/onboarding_item.dart';
 
@@ -34,16 +32,10 @@ class OnboardingScreen extends StatelessWidget {
           Positioned(
             top: 20.h,
             right: 20.w,
-            child: TextButton(
-              onPressed: provider.skip,
-              child: Text(
-                "Skip",
-                style: AppStyle.styleMedium16.copyWith(color: AppColor.primary),
-              ),
-            ),
+            child: TextButton(onPressed: provider.skip, child: Text("Skip")),
           ),
           Positioned(
-            bottom: 40.h,
+            bottom: 20.h,
             left: 0,
             right: 0,
             child: OnboardingColumnDots(provider: provider),
