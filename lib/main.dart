@@ -5,6 +5,7 @@ import 'core/config.dart';
 import 'core/constant/app_router.dart';
 import 'core/constant/app_theme.dart';
 import 'core/service/storage_service.dart';
+import 'providers/login_provider.dart';
 import 'providers/onboarding_provider.dart';
 
 Future<void> main() async {
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
         return MultiProvider(
           providers: [
             ChangeNotifierProvider(create: (_) => OnboardingProvider()),
+            ChangeNotifierProvider(create: (_) => LoginProvider()),
           ],
           child: MaterialApp.router(
             title: Config.appName,

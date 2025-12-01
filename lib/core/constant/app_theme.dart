@@ -32,5 +32,14 @@ abstract class AppTheme {
         padding: EdgeInsets.all(8.w),
       ),
     ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColor.primary,
+        textStyle: AppStyle.styleMedium14.copyWith(color: AppColor.primary),
+        side: BorderSide(color: AppColor.primary, width: 1.w),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
+      ),
+    ),
   );
 }

@@ -5,17 +5,21 @@ import '../core/constant/app_router.dart';
 import '../core/service/storage_service.dart';
 
 class OnboardingProvider extends ChangeNotifier {
-  int currentPage = 0;
-  PageController controller = PageController();
+  int _currentPage = 0;
+  final PageController _controller = PageController();
+
+  // Getters
+  int get currentPage => _currentPage;
+  PageController get controller => _controller;
 
   void onPageChanged(int index) {
-    currentPage = index;
+    _currentPage = index;
     notifyListeners();
   }
 
   void nextPage(BuildContext context) {
     if (!isLastPage) {
-      controller.nextPage(
+      _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
@@ -26,8 +30,8 @@ class OnboardingProvider extends ChangeNotifier {
   }
 
   void previousPage() {
-    if (currentPage > 0) {
-      controller.previousPage(
+    if (_currentPage > 0) {
+      _controller.previousPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
@@ -35,12 +39,18 @@ class OnboardingProvider extends ChangeNotifier {
   }
 
   void skip() {
-    controller.animateToPage(
+    _controller.animateToPage(
       2,
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
   }
 
-  bool get isLastPage => currentPage == 2;
+  bool get isLastPage => _currentPage == 2;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }
