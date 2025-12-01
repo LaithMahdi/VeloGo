@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/config.dart';
 import 'core/constant/app_color.dart';
 import 'core/constant/app_router.dart';
@@ -12,14 +13,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: Config.appName,
-      theme: ThemeData(
-        primaryColor: AppColor.primary,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColor.primary),
-        scaffoldBackgroundColor: AppColor.background,
+    return ScreenUtilInit(
+      designSize: Size(393, 852),
+      child: MaterialApp.router(
+        title: Config.appName,
+        theme: ThemeData(
+          primaryColor: AppColor.primary,
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColor.primary),
+          scaffoldBackgroundColor: AppColor.background,
+        ),
+        routerConfig: AppRouter.router,
       ),
-      routerConfig: AppRouter.router,
     );
   }
 }
