@@ -4,9 +4,12 @@ import 'package:provider/provider.dart';
 import 'core/config.dart';
 import 'core/constant/app_router.dart';
 import 'core/constant/app_theme.dart';
+import 'core/service/storage_service.dart';
 import 'providers/onboarding_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await StorageService.init();
   runApp(const MyApp());
 }
 

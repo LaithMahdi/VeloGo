@@ -4,4 +4,5 @@ class Config {
   static const String appName = 'VeloGo';
   static const String appVersion = '1.0.0';
   static const String appFontFamily = 'Poppins';
+  static const String onboardingSeenKey = 'onboarding_seen';
 }

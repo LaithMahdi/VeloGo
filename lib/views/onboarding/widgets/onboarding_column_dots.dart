@@ -33,7 +33,7 @@ class OnboardingColumnDots extends StatelessWidget {
                 child: const Text("Previous"),
               ),
               ElevatedButton(
-                onPressed: provider.nextPage,
+                onPressed: () => provider.nextPage(context),
                 child: const Text("Next"),
               ),
             ],

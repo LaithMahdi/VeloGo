@@ -1,10 +1,12 @@
 import 'package:go_router/go_router.dart';
+import '../../views/login/login_screen.dart';
 import '../../views/onboarding/onboarding_screen.dart';
 import '../../views/splash/splash_screen.dart';
 
 abstract class AppRouter {
   static const String splash = '/';
   static const String onBoarding = '/onBoarding';
+  static const String login = '/login';
   static const String home = '/home';
 
   static final router = GoRouter(
@@ -14,6 +16,7 @@ abstract class AppRouter {
         path: onBoarding,
         builder: (context, state) => const OnboardingScreen(),
       ),
+      GoRoute(path: login, builder: (context, state) => const LoginScreen()),
     ],
   );
 }
