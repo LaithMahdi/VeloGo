@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/config.dart';
 import '../../core/constant/app_color.dart';
+import '../../core/constant/app_router.dart';
 import '../../core/constant/app_style.dart';
 import '../../shared/logo.dart';
 import '../../shared/spacer.dart';
@@ -14,6 +16,14 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    Future.delayed(const Duration(seconds: 2), () {
+      GoRouter.of(context).go(AppRouter.onBoarding);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
