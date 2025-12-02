@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../core/constant/app_router.dart';
 import '../data/service/auth_service.dart';
-import '../data/model/user_model.dart';
+import '../core/utils/snackbar_utils.dart';
+import 'auth_provider.dart';
 
 class SignupProvider extends ChangeNotifier {
   final TextEditingController _fullName = TextEditingController();
@@ -16,8 +18,6 @@ class SignupProvider extends ChangeNotifier {
   bool _isConfirmPasswordVisible = false;
   bool _agreeToTerms = false;
   bool _isLoading = false;
-  String? _errorMessage;
-  UserModel? _currentUser;
 
   final GlobalKey<FormState> _signupFormKey = GlobalKey<FormState>();
 
@@ -32,21 +32,22 @@ class SignupProvider extends ChangeNotifier {
   bool get isConfirmPasswordVisible => _isConfirmPasswordVisible;
   bool get agreeToTerms => _agreeToTerms;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  UserModel? get currentUser => _currentUser;
 
   GlobalKey<FormState> get signupFormKey => _signupFormKey;
 
-  void onSubmit(BuildContext context) async {
+  Future<void> onSubmit(BuildContext context) async {
     if (_signupFormKey.currentState!.validate()) {
       if (!_agreeToTerms) {
-        _errorMessage = "You must agree to the terms and conditions";
-        notifyListeners();
+        if (context.mounted) {
+          SnackbarUtils.showError(
+            context,
+            "You must agree to the terms and conditions",
+          );
+        }
         return;
       }
 
       _isLoading = true;
-      _errorMessage = null;
       notifyListeners();
 
       try {
@@ -57,16 +58,24 @@ class SignupProvider extends ChangeNotifier {
           phoneNumber: _phoneNumber.text.trim(),
         );
 
-        if (user != null) {
-          _currentUser = user;
-          debugPrint("✅ Signup successful: ${user.email}");
+        if (user != null && context.mounted) {
+          // Update global auth state
+          context.read<AuthProvider>().setCurrentUser(user);
+
+          SnackbarUtils.showSuccess(
+            context,
+            "Account created successfully! Welcome, ${user.fullName ?? user.email}!",
+          );
+
+          // Navigate to home
           GoRouter.of(context).go(AppRouter.home);
-        } else {
-          _errorMessage = "Signup failed. Please try again.";
+        } else if (context.mounted) {
+          SnackbarUtils.showError(context, "Signup failed. Please try again.");
         }
       } catch (e) {
-        _errorMessage = e.toString();
-        debugPrint("❌ Signup failed: $e");
+        if (context.mounted) {
+          SnackbarUtils.showError(context, e.toString());
+        }
       } finally {
         _isLoading = false;
         notifyListeners();
@@ -86,7 +95,6 @@ class SignupProvider extends ChangeNotifier {
 
   void toggleAgreeToTerms(bool? value) {
     _agreeToTerms = value ?? false;
-    _errorMessage = null;
     notifyListeners();
   }
 
@@ -98,11 +106,6 @@ class SignupProvider extends ChangeNotifier {
       return "Passwords do not match";
     }
     return null;
-  }
-
-  void clearError() {
-    _errorMessage = null;
-    notifyListeners();
   }
 
   @override

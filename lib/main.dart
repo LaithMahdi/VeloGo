@@ -7,6 +7,7 @@ import 'core/constant/app_router.dart';
 import 'core/constant/app_theme.dart';
 import 'core/service/storage_service.dart';
 import 'core/service/supabase_service.dart';
+import 'providers/auth_provider.dart';
 import 'providers/login_provider.dart';
 import 'providers/onboarding_provider.dart';
 import 'providers/signup_provider.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MultiProvider(
           providers: [
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
             ChangeNotifierProvider(create: (_) => OnboardingProvider()),
             ChangeNotifierProvider(create: (_) => LoginProvider()),
             ChangeNotifierProvider(create: (_) => SignupProvider()),

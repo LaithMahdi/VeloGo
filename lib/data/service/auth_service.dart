@@ -18,9 +18,17 @@ class AuthService {
         email: email,
         password: password,
         data: {'full_name': fullName, 'phone_number': phoneNumber},
+        emailRedirectTo: 'velogo://login-callback',
       );
 
       if (response.user != null) {
+        await _createUserProfile(
+          userId: response.user!.id,
+          email: email,
+          fullName: fullName,
+          phoneNumber: phoneNumber,
+        );
+
         debugPrint('✅ Sign up successful: ${response.user!.email}');
         return UserModel.fromJson(response.user!.toJson());
       }
@@ -28,10 +36,32 @@ class AuthService {
       return null;
     } on AuthException catch (e) {
       debugPrint('❌ Auth error during sign up: ${e.message}');
-      throw e.message;
+      throw _handleAuthError(e);
     } catch (e) {
       debugPrint('❌ Unexpected error during sign up: $e');
       throw 'An unexpected error occurred. Please try again.';
+    }
+  }
+
+  // Create user profile in 'profiles' table
+  Future<void> _createUserProfile({
+    required String userId,
+    required String email,
+    String? fullName,
+    String? phoneNumber,
+  }) async {
+    try {
+      await _supabaseService.client.from('profiles').insert({
+        'id': userId,
+        'email': email,
+        'full_name': fullName ?? '',
+        'phone_number': phoneNumber ?? '',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      debugPrint('✅ User profile created for: $email');
+    } catch (e) {
+      debugPrint('❌ Error creating user profile: $e');
+      // Don't throw here to allow signup to succeed even if profile creation fails
     }
   }
 
@@ -48,16 +78,69 @@ class AuthService {
 
       if (response.user != null) {
         debugPrint('✅ Sign in successful: ${response.user!.email}');
-        return UserModel.fromJson(response.user!.toJson());
+
+        // Try to get user profile
+        final profile = await _getUserProfile(response.user!.id);
+
+        return UserModel(
+          id: response.user!.id,
+          email: response.user!.email ?? email,
+          fullName: profile?['full_name'] ?? '',
+          phoneNumber: profile?['phone_number'] ?? '',
+          createdAt: DateTime.now(),
+        );
       }
 
       return null;
     } on AuthException catch (e) {
       debugPrint('❌ Auth error during sign in: ${e.message}');
-      throw e.message;
+      throw _handleAuthError(e);
     } catch (e) {
       debugPrint('❌ Unexpected error during sign in: $e');
       throw 'An unexpected error occurred. Please try again.';
+    }
+  }
+
+  // Get user profile from 'profiles' table
+  Future<Map<String, dynamic>?> _getUserProfile(String userId) async {
+    try {
+      final response = await _supabaseService.client
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .single();
+
+      if (response['error'] != null) {
+        debugPrint('❌ Error fetching user profile: ${response['error']}');
+        return null;
+      }
+
+      return response['data'] as Map<String, dynamic>?;
+    } catch (e) {
+      debugPrint('❌ Error fetching user profile: $e');
+      return null;
+    }
+  }
+
+  // Handle auth errors with user-friendly messages
+  String _handleAuthError(AuthException e) {
+    switch (e.message) {
+      case 'User already registered':
+        return 'This email is already registered. Please try logging in.';
+      case 'Invalid login credentials':
+        return 'Invalid email or password. Please try again.';
+      case 'Email not confirmed':
+        return 'Please verify your email address before logging in.';
+      case 'Weak password':
+        return 'Password is too weak. Please use a stronger password.';
+      case 'Password should be at least 6 characters':
+        return 'Password must be at least 6 characters long.';
+      case 'Database error saving new user':
+        return 'Unable to create account. Please try again.';
+      case 'Signup disabled':
+        return 'New signups are currently disabled. Please contact support.';
+      default:
+        return e.message;
     }
   }
 
@@ -79,7 +162,13 @@ class AuthService {
   UserModel? getCurrentUser() {
     final user = _supabaseService.currentUser;
     if (user != null) {
-      return UserModel.fromJson(user.toJson());
+      return UserModel(
+        id: user.id,
+        email: user.email ?? '',
+        fullName: user.userMetadata?['full_name'] ?? '',
+        phoneNumber: user.userMetadata?['phone_number'] ?? '',
+        createdAt: DateTime.now(),
+      );
     }
     return null;
   }
@@ -90,7 +179,10 @@ class AuthService {
   // Reset password
   Future<void> resetPassword(String email) async {
     try {
-      await _supabaseService.auth.resetPasswordForEmail(email);
+      await _supabaseService.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'velogo://reset-password',
+      );
       debugPrint('✅ Password reset email sent to: $email');
     } on AuthException catch (e) {
       debugPrint('❌ Auth error during password reset: ${e.message}');
@@ -108,6 +200,7 @@ class AuthService {
     String? avatarUrl,
   }) async {
     try {
+      // Update auth metadata
       final response = await _supabaseService.auth.updateUser(
         UserAttributes(
           data: {
@@ -119,6 +212,20 @@ class AuthService {
       );
 
       if (response.user != null) {
+        // Also update the profiles table
+        final currentUser = _supabaseService.currentUser;
+        if (currentUser != null) {
+          await _supabaseService.client
+              .from('profiles')
+              .update({
+                if (fullName != null) 'full_name': fullName,
+                if (phoneNumber != null) 'phone_number': phoneNumber,
+                if (avatarUrl != null) 'avatar_url': avatarUrl,
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('id', currentUser.id);
+        }
+
         debugPrint('✅ Profile updated successfully');
         return UserModel.fromJson(response.user!.toJson());
       }
