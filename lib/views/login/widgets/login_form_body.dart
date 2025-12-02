@@ -74,13 +74,54 @@ class LoginFormBody extends StatelessWidget {
             width: double.infinity,
             height: 50.h,
             child: ElevatedButton(
-              onPressed: provider.onSubmit,
-              child: Text(
-                "Sign In",
-                style: AppStyle.styleSemiBold16.copyWith(color: Colors.white),
-              ),
+              onPressed: () =>
+                  provider.isLoading ? null : provider.onSubmit(context),
+              child: provider.isLoading
+                  ? SizedBox(
+                      height: 20.h,
+                      width: 20.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      "Sign In",
+                      style: AppStyle.styleSemiBold16.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
+          if (provider.errorMessage != null) ...[
+            VerticalSpacer(16),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red.shade700,
+                    size: 20.w,
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      provider.errorMessage!,
+                      style: AppStyle.styleRegular14.copyWith(
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

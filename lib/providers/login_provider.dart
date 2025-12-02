@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../core/constant/app_router.dart';
+import '../data/service/auth_service.dart';
+import '../data/model/user_model.dart';
 
 class LoginProvider extends ChangeNotifier {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final AuthService _authService = AuthService();
+
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+  String? _errorMessage;
+  UserModel? _currentUser;
+
   final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
 
   // Getters
@@ -12,23 +21,32 @@ class LoginProvider extends ChangeNotifier {
   TextEditingController get password => _password;
   bool get isPasswordVisible => _isPasswordVisible;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  UserModel? get currentUser => _currentUser;
   GlobalKey<FormState> get loginFormKey => _loginFormKey;
 
-  void onSubmit() async {
+  void onSubmit(BuildContext context) async {
     if (_loginFormKey.currentState!.validate()) {
       _isLoading = true;
+      _errorMessage = null;
       notifyListeners();
 
       try {
-        // Perform login action
-        await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+        final user = await _authService.signIn(
+          email: _email.text.trim(),
+          password: _password.text,
+        );
 
-        // Handle successful login
-        print("Login successful");
-        print("Email: ${_email.text}");
+        if (user != null) {
+          _currentUser = user;
+          debugPrint("✅ Login successful: ${user.email}");
+          GoRouter.of(context).go(AppRouter.home);
+        } else {
+          _errorMessage = "Login failed. Please try again.";
+        }
       } catch (e) {
-        // Handle error
-        print("Login failed: $e");
+        _errorMessage = e.toString();
+        debugPrint("❌ Login failed: $e");
       } finally {
         _isLoading = false;
         notifyListeners();
@@ -44,6 +62,12 @@ class LoginProvider extends ChangeNotifier {
   void clearFields() {
     _email.clear();
     _password.clear();
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 

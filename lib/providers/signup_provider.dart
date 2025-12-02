@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../core/constant/app_router.dart';
+import '../data/service/auth_service.dart';
+import '../data/model/user_model.dart';
 
 class SignupProvider extends ChangeNotifier {
   final TextEditingController _fullName = TextEditingController();
@@ -6,10 +10,14 @@ class SignupProvider extends ChangeNotifier {
   final TextEditingController _phoneNumber = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
+  final AuthService _authService = AuthService();
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _agreeToTerms = false;
+  bool _isLoading = false;
+  String? _errorMessage;
+  UserModel? _currentUser;
 
   final GlobalKey<FormState> _signupFormKey = GlobalKey<FormState>();
 
@@ -23,20 +31,46 @@ class SignupProvider extends ChangeNotifier {
   bool get isPasswordVisible => _isPasswordVisible;
   bool get isConfirmPasswordVisible => _isConfirmPasswordVisible;
   bool get agreeToTerms => _agreeToTerms;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  UserModel? get currentUser => _currentUser;
 
   GlobalKey<FormState> get signupFormKey => _signupFormKey;
 
-  void onSubmit() {
+  void onSubmit(BuildContext context) async {
     if (_signupFormKey.currentState!.validate()) {
       if (!_agreeToTerms) {
-        // Show error - must agree to terms
+        _errorMessage = "You must agree to the terms and conditions";
+        notifyListeners();
         return;
       }
-      // Perform signup action
-      print("Signup submitted");
-      print("Name: ${_fullName.text}");
-      print("Email: ${_email.text}");
-      print("Phone: ${_phoneNumber.text}");
+
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      try {
+        final user = await _authService.signUp(
+          email: _email.text.trim(),
+          password: _password.text,
+          fullName: _fullName.text.trim(),
+          phoneNumber: _phoneNumber.text.trim(),
+        );
+
+        if (user != null) {
+          _currentUser = user;
+          debugPrint("✅ Signup successful: ${user.email}");
+          GoRouter.of(context).go(AppRouter.home);
+        } else {
+          _errorMessage = "Signup failed. Please try again.";
+        }
+      } catch (e) {
+        _errorMessage = e.toString();
+        debugPrint("❌ Signup failed: $e");
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -52,6 +86,7 @@ class SignupProvider extends ChangeNotifier {
 
   void toggleAgreeToTerms(bool? value) {
     _agreeToTerms = value ?? false;
+    _errorMessage = null;
     notifyListeners();
   }
 
@@ -63,6 +98,11 @@ class SignupProvider extends ChangeNotifier {
       return "Passwords do not match";
     }
     return null;
+  }
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 
   @override
