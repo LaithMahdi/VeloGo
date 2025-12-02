@@ -46,6 +46,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Update current user data
+  void updateCurrentUser(UserModel updatedUser) {
+    _currentUser = updatedUser;
+    notifyListeners();
+  }
+
   // Sign out
   Future<void> signOut() async {
     try {

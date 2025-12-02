@@ -145,4 +145,14 @@ abstract class AppStyle {
     fontSize: 20.sp,
     fontWeight: FontWeight.w700,
   );
+
+  static TextStyle styleBold24 = TextStyle(
+    fontSize: 24.sp,
+    fontWeight: FontWeight.w700,
+  );
+
+  static TextStyle styleBold28 = TextStyle(
+    fontSize: 28.sp,
+    fontWeight: FontWeight.w700,
+  );
 }

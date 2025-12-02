@@ -7,8 +7,12 @@ import '../core/utils/snackbar_utils.dart';
 import 'auth_provider.dart';
 
 class LoginProvider extends ChangeNotifier {
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final TextEditingController _email = TextEditingController(
+    text: "mahdilaith380@gmail.com",
+  );
+  final TextEditingController _password = TextEditingController(
+    text: "12345678",
+  );
   final AuthService _authService = AuthService();
 
   bool _isPasswordVisible = false;
@@ -46,7 +50,7 @@ class LoginProvider extends ChangeNotifier {
           _clearForm();
 
           // Navigate to home
-          GoRouter.of(context).go(AppRouter.home);
+          GoRouter.of(context).go(AppRouter.mainNavigation);
         } else if (context.mounted) {
           SnackbarUtils.showError(
             context,
