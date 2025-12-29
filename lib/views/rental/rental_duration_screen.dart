@@ -308,6 +308,7 @@ class _RentalDurationScreenState extends State<RentalDurationScreen> {
         GoRouter.of(context).push(AppRouter.activeRental);
       }
     } catch (e) {
+      print("Error renting bike: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,

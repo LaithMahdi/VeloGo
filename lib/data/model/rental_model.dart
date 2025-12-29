@@ -7,7 +7,7 @@ class RentalModel {
   final BikeModel? bike;
   final DateTime startTime;
   final DateTime? endTime;
-  final int durationMinutes; // in minutes
+  final int durationMinutes;
   final DateTime plannedEndTime;
   final double pricePerHour;
   final double? totalCost;
@@ -36,30 +36,47 @@ class RentalModel {
   });
 
   factory RentalModel.fromJson(Map<String, dynamic> json) {
+    T require<T>(String key) {
+      final value = json[key];
+      if (value == null) {
+        throw Exception(
+          'RentalModel.fromJson: Required key "$key" is missing or null. Data: '
+          '${json.toString()}',
+        );
+      }
+      return value as T;
+    }
+
     return RentalModel(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      bikeId: json['bike_id'] as String,
+      id: require<String>('id'),
+      userId: require<String>('user_id'),
+      bikeId: require<String>('bike_id'),
       bike: json['bike'] != null
           ? BikeModel.fromJson(json['bike'] as Map<String, dynamic>)
           : null,
-      startTime: DateTime.parse(json['start_time'] as String),
+      startTime: DateTime.parse(require<String>('start_time')),
       endTime: json['end_time'] != null
           ? DateTime.parse(json['end_time'] as String)
           : null,
-      durationMinutes: json['duration_minutes'] as int,
-      plannedEndTime: DateTime.parse(json['planned_end_time'] as String),
+      durationMinutes: require<int>('duration_minutes'),
+      plannedEndTime: DateTime.parse(require<String>('planned_end_time')),
       pricePerHour: json['price_per_hour'] != null
           ? (json['price_per_hour'] as num).toDouble()
           : 5.0,
       totalCost: json['total_cost'] != null
           ? (json['total_cost'] as num).toDouble()
           : null,
-      status: RentalStatus.fromString(json['status'] as String),
-      startLocation: json['start_location'] as String?,
+      status: RentalStatus.fromString(require<String>('status')),
+      startLocation: json['start_location'] ?? "",
       endLocation: json['end_location'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.parse(require<String>('start_time')),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : (json['created_at'] != null
+                ? DateTime.parse(json['created_at'] as String)
+                : DateTime.parse(require<String>('start_time'))),
     );
   }
 

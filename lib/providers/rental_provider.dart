@@ -29,6 +29,9 @@ class RentalProvider extends ChangeNotifier {
 
     try {
       // Call Supabase to insert rental in database
+      print(
+        "userId : $userId, bikeId: ${bike.id}, duration: $durationMinutes, pricePerHour: $pricePerHour",
+      );
       final rental = await _rentalService.startRental(
         userId: userId,
         bikeId: bike.id,

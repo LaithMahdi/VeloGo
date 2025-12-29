@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/service/supabase_service.dart';
 import '../model/rental_model.dart';
+import '../../core/utils/string_extensions.dart';
 
 class RentalService {
   final SupabaseClient _supabase = SupabaseService().client;
@@ -23,9 +24,18 @@ class RentalService {
           'p_price_per_hour': pricePerHour,
         },
       );
-
       if (response == null) {
         throw Exception('Failed to start rental: No response from server');
+      }
+
+      // Resolve rental id from RPC response. RPC may return scalar id, a map, or a list.
+      String rentalId;
+      if (response is String) {
+        rentalId = response;
+      } else {
+        throw Exception(
+          'Failed to start rental: Unexpected RPC response shape: ${response.runtimeType} - $response',
+        );
       }
 
       // Fetch the complete rental data with bike details
@@ -42,7 +52,7 @@ class RentalService {
             price_per_hour,
             total_cost,
             status,
-            bikes:bike_id (
+            bike:bike_id (
               id,
               station_id,
               model,
@@ -51,16 +61,15 @@ class RentalService {
               status,
               battery_level,
               condition_score,
-              image_url,
-              price_per_hour
+              image
             )
           ''')
           .eq('id', response)
           .single();
-
       return RentalModel.fromJson(rentalData);
     } catch (e) {
-      throw Exception('Failed to start rental: $e');
+      final msg = e.toString().extractMissingKeyMessage();
+      throw Exception('Failed to start rental: $msg');
     }
   }
 
@@ -90,7 +99,7 @@ class RentalService {
             price_per_hour,
             total_cost,
             status,
-            bikes:bike_id (
+            bike:bike_id (
               id,
               station_id,
               model,
@@ -99,8 +108,7 @@ class RentalService {
               status,
               battery_level,
               condition_score,
-              image_url,
-              price_per_hour
+              image,
             )
           ''')
           .eq('id', rentalId)
@@ -128,7 +136,7 @@ class RentalService {
             price_per_hour,
             total_cost,
             status,
-            bikes:bike_id (
+            bike:bike_id (
               id,
               station_id,
               model,
@@ -137,8 +145,7 @@ class RentalService {
               status,
               battery_level,
               condition_score,
-              image_url,
-              price_per_hour
+              image,
             )
           ''')
           .eq('user_id', userId)
@@ -171,7 +178,7 @@ class RentalService {
             price_per_hour,
             total_cost,
             status,
-            bikes:bike_id (
+            bike:bike_id (
               id,
               station_id,
               model,
@@ -180,8 +187,7 @@ class RentalService {
               status,
               battery_level,
               condition_score,
-              image_url,
-              price_per_hour
+              image,
             )
           ''')
           .eq('user_id', userId)
