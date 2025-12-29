@@ -18,7 +18,6 @@ class AuthService {
         email: email,
         password: password,
         data: {'full_name': fullName, 'phone_number': phoneNumber},
-        emailRedirectTo: 'velogo://login-callback',
       );
 
       if (response.user != null) {
@@ -56,7 +55,6 @@ class AuthService {
         'email': email,
         'full_name': fullName ?? '',
         'phone_number': phoneNumber ?? '',
-        'created_at': DateTime.now().toIso8601String(),
       });
       debugPrint('✅ User profile created for: $email');
     } catch (e) {

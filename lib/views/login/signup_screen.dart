@@ -31,7 +31,6 @@ class SignupScreen extends StatelessWidget {
                 description: "Fill in your details to get started with VeloGo",
               ),
               VerticalSpacer(32),
-              // Use Consumer to access the provider
               Consumer<SignupProvider>(
                 builder: (context, provider, child) {
                   return SignupFormBody(provider: provider);

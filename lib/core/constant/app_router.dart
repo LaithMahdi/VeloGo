@@ -31,19 +31,22 @@ abstract class AppRouter {
       final hasSeenOnboarding =
           StorageService.instance.getBool(Config.onboardingSeenKey) ?? false;
 
+      final isOnSplash = state.matchedLocation == splash;
       final isOnOnboarding = state.matchedLocation == onBoarding;
       final isOnLogin = state.matchedLocation == login;
       final isOnSignup = state.matchedLocation == signup;
       final isOnHome = state.matchedLocation == home;
 
-      // If user is authenticated and trying to access auth pages, redirect to home
-      if (isAuthenticated && (isOnLogin || isOnSignup)) {
+      // If user is authenticated, redirect to main navigation
+      if (isAuthenticated &&
+          (isOnSplash || isOnLogin || isOnSignup || isOnOnboarding)) {
         return mainNavigation;
       }
 
-      // If user is not authenticated and trying to access home, redirect to login
-      if (!isAuthenticated && isOnHome) {
-        return login;
+      // If user is not authenticated and trying to access protected routes
+      if (!isAuthenticated &&
+          (isOnHome || state.matchedLocation == mainNavigation)) {
+        return hasSeenOnboarding ? login : onBoarding;
       }
 
       // If user has seen onboarding and is on onboarding page, redirect to login

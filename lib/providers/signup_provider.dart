@@ -68,7 +68,7 @@ class SignupProvider extends ChangeNotifier {
           );
 
           // Navigate to home
-          GoRouter.of(context).go(AppRouter.home);
+          GoRouter.of(context).go(AppRouter.mainNavigation);
         } else if (context.mounted) {
           SnackbarUtils.showError(context, "Signup failed. Please try again.");
         }
