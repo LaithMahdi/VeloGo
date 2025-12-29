@@ -46,7 +46,7 @@ class ActiveRentalCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    rental?.bike?.name ?? 'Bike',
+                    rental?.bike?.model ?? 'Bike',
                     style: AppStyle.styleSemiBold16.copyWith(
                       color: Colors.white,
                     ),

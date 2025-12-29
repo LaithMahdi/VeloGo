@@ -133,12 +133,12 @@ class _RentalCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      rental.bike?.name ?? 'Bike',
+                      rental.bike?.model ?? 'Bike',
                       style: AppStyle.styleSemiBold16,
                     ),
                     VerticalSpacer(4),
                     Text(
-                      rental.bike?.bikeNumber ?? '',
+                      rental.bike?.qrCode ?? '',
                       style: AppStyle.styleRegular12.copyWith(
                         color: AppColor.lightGray,
                       ),

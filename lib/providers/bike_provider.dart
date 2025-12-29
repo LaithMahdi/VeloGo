@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import '../data/model/bike_model.dart';
 import '../data/model/station_model.dart';
+import '../data/service/bike_service.dart';
+import '../data/service/station_service.dart';
 
 class BikeProvider extends ChangeNotifier {
+  final BikeService _bikeService = BikeService();
+  final StationService _stationService = StationService();
+
   List<BikeModel> _bikes = [];
   List<StationModel> _nearbyStations = [];
   BikeModel? _selectedBike;
@@ -16,44 +21,13 @@ class BikeProvider extends ChangeNotifier {
   String? get error => _error;
 
   // Fetch available bikes
-  Future<void> fetchBikes() async {
+  Future<void> fetchBikes({String? status = 'available'}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // TODO: Implement API call to fetch bikes
-      // For now, create mock bikes
-      _bikes = [
-        BikeModel(
-          id: '1',
-          bikeNumber: 'BIKE-001',
-          name: 'City Cruiser',
-          imageUrl: 'https://via.placeholder.com/300x200',
-          pricePerHour: 5.0,
-          status: BikeStatus.available,
-          currentLocation: 'Downtown Station',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          stationId: 'station-1',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        BikeModel(
-          id: '2',
-          bikeNumber: 'BIKE-002',
-          name: 'Mountain Explorer',
-          imageUrl: 'https://via.placeholder.com/300x200',
-          pricePerHour: 8.0,
-          status: BikeStatus.available,
-          currentLocation: 'Central Park Station',
-          latitude: 40.7829,
-          longitude: -73.9654,
-          stationId: 'station-2',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-      ];
+      _bikes = await _bikeService.fetchBikes(status: status);
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -64,40 +38,19 @@ class BikeProvider extends ChangeNotifier {
   }
 
   // Fetch nearby stations
-  Future<void> fetchNearbyStations() async {
+  Future<void> fetchNearbyStations({
+    double? latitude,
+    double? longitude,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // TODO: Implement API call to fetch nearby stations
-      // For now, create mock stations
-      _nearbyStations = [
-        StationModel(
-          id: 'station-1',
-          name: 'Downtown Station',
-          address: '123 Main Street',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          totalSlots: 20,
-          availableSlots: 8,
-          availableBikes: 12,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        StationModel(
-          id: 'station-2',
-          name: 'Central Park Station',
-          address: '456 Park Avenue',
-          latitude: 40.7829,
-          longitude: -73.9654,
-          totalSlots: 15,
-          availableSlots: 5,
-          availableBikes: 10,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-      ];
+      _nearbyStations = await _stationService.fetchNearbyStations(
+        latitude: latitude,
+        longitude: longitude,
+      );
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -114,24 +67,7 @@ class BikeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement API call to get bike by QR code
-      // For now, simulate fetching a bike
-      await Future.delayed(const Duration(seconds: 1));
-
-      final bike = BikeModel(
-        id: qrCode,
-        bikeNumber: qrCode,
-        name: 'City Cruiser',
-        imageUrl: 'https://via.placeholder.com/300x200',
-        pricePerHour: 5.0,
-        status: BikeStatus.available,
-        currentLocation: 'Downtown Station',
-        latitude: 40.7128,
-        longitude: -74.0060,
-        stationId: 'station-1',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+      final bike = await _bikeService.fetchBikeByQRCode(qrCode);
 
       _selectedBike = bike;
       _isLoading = false;
@@ -142,6 +78,23 @@ class BikeProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return null;
+    }
+  }
+
+  // Get bikes by station
+  Future<void> fetchBikesByStation(String stationId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _bikes = await _bikeService.fetchBikesByStation(stationId);
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

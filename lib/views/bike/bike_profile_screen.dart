@@ -75,7 +75,7 @@ class BikeProfileScreen extends StatelessWidget {
                     ),
                     VerticalSpacer(24),
                     // Bike Name & ID
-                    Text(bike.name, style: AppStyle.styleBold24),
+                    Text(bike.model, style: AppStyle.styleBold24),
                     VerticalSpacer(8),
                     Row(
                       children: [
@@ -86,7 +86,7 @@ class BikeProfileScreen extends StatelessWidget {
                         ),
                         const HorizontalSpacer(4),
                         Text(
-                          bike.bikeNumber,
+                          bike.qrCode,
                           style: AppStyle.styleRegular14.copyWith(
                             color: AppColor.lightGray,
                           ),
@@ -95,22 +95,30 @@ class BikeProfileScreen extends StatelessWidget {
                     ),
                     VerticalSpacer(24),
                     // Status Badge
-                    _StatusBadge(status: bike.status),
+                    _StatusBadge(status: BikeStatus.fromString(bike.status)),
                     VerticalSpacer(24),
                     // Details
                     _DetailRow(
-                      icon: Icons.attach_money,
-                      label: 'Price per hour',
-                      value: '\$${bike.pricePerHour.toStringAsFixed(2)}',
+                      icon: Icons.pedal_bike,
+                      label: 'Bike Type',
+                      value: bike.bikeType.toUpperCase(),
                     ),
                     VerticalSpacer(16),
                     _DetailRow(
-                      icon: Icons.location_on_outlined,
-                      label: 'Current Location',
-                      value: bike.currentLocation ?? 'Unknown',
+                      icon: Icons.color_lens_outlined,
+                      label: 'Color',
+                      value: bike.color ?? 'Not specified',
                     ),
+                    if (bike.batteryLevel != null) ...[
+                      VerticalSpacer(16),
+                      _DetailRow(
+                        icon: Icons.battery_charging_full,
+                        label: 'Battery Level',
+                        value: '${bike.batteryLevel}%',
+                      ),
+                    ],
                     VerticalSpacer(24),
-                    // Rental Cost Estimation
+                    // Stats
                     Container(
                       padding: EdgeInsets.all(16.w),
                       decoration: BoxDecoration(
@@ -121,21 +129,34 @@ class BikeProfileScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Rental Cost Estimation',
+                            'Bike Statistics',
                             style: AppStyle.styleSemiBold16,
                           ),
                           VerticalSpacer(12),
-                          _CostRow(duration: '1 hour', cost: bike.pricePerHour),
-                          VerticalSpacer(8),
-                          _CostRow(
-                            duration: '2 hours',
-                            cost: bike.pricePerHour * 2,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatItem(
+                                  label: 'Total Rentals',
+                                  value: '${bike.totalRentals}',
+                                ),
+                              ),
+                              Expanded(
+                                child: _StatItem(
+                                  label: 'Distance',
+                                  value:
+                                      '${bike.totalDistance.toStringAsFixed(1)} km',
+                                ),
+                              ),
+                            ],
                           ),
-                          VerticalSpacer(8),
-                          _CostRow(
-                            duration: '1 day (24h)',
-                            cost: bike.pricePerHour * 24,
-                          ),
+                          if (bike.conditionScore != null) ...[
+                            VerticalSpacer(12),
+                            _StatItem(
+                              label: 'Condition Score',
+                              value: '${bike.conditionScore}/100',
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -232,17 +253,21 @@ class _StatusBadge extends StatelessWidget {
         color = Colors.green;
         text = 'Available';
         break;
-      case BikeStatus.inUse:
+      case BikeStatus.rented:
         color = Colors.orange;
-        text = 'In Use';
+        text = 'Rented';
         break;
       case BikeStatus.maintenance:
         color = Colors.red;
         text = 'Maintenance';
         break;
-      case BikeStatus.unavailable:
+      case BikeStatus.damaged:
+        color = AppColor.red;
+        text = 'Damaged';
+        break;
+      case BikeStatus.retired:
         color = AppColor.lightGray;
-        text = 'Unavailable';
+        text = 'Retired';
         break;
     }
 
@@ -295,22 +320,23 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-class _CostRow extends StatelessWidget {
-  final String duration;
-  final double cost;
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
 
-  const _CostRow({required this.duration, required this.cost});
+  const _StatItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(duration, style: AppStyle.styleRegular14),
         Text(
-          '\$${cost.toStringAsFixed(2)}',
-          style: AppStyle.styleSemiBold14.copyWith(color: AppColor.primary),
+          label,
+          style: AppStyle.styleRegular12.copyWith(color: AppColor.lightGray),
         ),
+        VerticalSpacer(4),
+        Text(value, style: AppStyle.styleSemiBold16),
       ],
     );
   }

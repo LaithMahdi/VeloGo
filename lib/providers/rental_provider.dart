@@ -30,7 +30,7 @@ class RentalProvider extends ChangeNotifier {
         bike: bike,
         startTime: DateTime.now(),
         status: RentalStatus.active,
-        startLocation: bike.currentLocation,
+        startLocation: bike.stationId ?? 'Unknown',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -106,9 +106,9 @@ class RentalProvider extends ChangeNotifier {
   // Calculate current cost
   double getCurrentCost() {
     if (_activeRental == null || _activeRental!.bike == null) return 0.0;
-    return _activeRental!.calculateCurrentCost(
-      _activeRental!.bike!.pricePerHour,
-    );
+    // Default price per hour is 5.0
+    const double pricePerHour = 5.0;
+    return _activeRental!.calculateCurrentCost(pricePerHour);
   }
 
   void clearError() {

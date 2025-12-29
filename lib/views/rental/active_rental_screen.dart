@@ -96,12 +96,12 @@ class _ActiveRentalScreenState extends State<ActiveRentalScreen> {
                     VerticalSpacer(24),
                     // Bike Name
                     Text(
-                      rental.bike?.name ?? 'Bike',
+                      rental.bike?.model ?? 'Bike',
                       style: AppStyle.styleBold24,
                     ),
                     VerticalSpacer(8),
                     Text(
-                      rental.bike?.bikeNumber ?? '',
+                      rental.bike?.qrCode ?? '',
                       style: AppStyle.styleRegular14.copyWith(
                         color: AppColor.lightGray,
                       ),
@@ -146,8 +146,7 @@ class _ActiveRentalScreenState extends State<ActiveRentalScreen> {
                     VerticalSpacer(16),
                     _InfoCard(
                       title: 'Price per Hour',
-                      value:
-                          '\$${rental.bike?.pricePerHour.toStringAsFixed(2) ?? '0.00'}',
+                      value: '\$5.00',
                       icon: Icons.price_change_outlined,
                     ),
                     VerticalSpacer(16),
