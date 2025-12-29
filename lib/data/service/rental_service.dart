@@ -80,9 +80,10 @@ class RentalService {
   }) async {
     try {
       // Call the complete_rental PostgreSQL function
+      // The database `complete_rental` function accepts only `p_rental_id`.
       await _supabase.rpc(
         'complete_rental',
-        params: {'p_rental_id': rentalId, 'p_station_id': stationId},
+        params: {'p_rental_id': rentalId},
       );
 
       // Fetch the updated rental data
@@ -108,7 +109,7 @@ class RentalService {
               status,
               battery_level,
               condition_score,
-              image,
+              image
             )
           ''')
           .eq('id', rentalId)
@@ -145,7 +146,7 @@ class RentalService {
               status,
               battery_level,
               condition_score,
-              image,
+              image
             )
           ''')
           .eq('user_id', userId)
@@ -187,7 +188,7 @@ class RentalService {
               status,
               battery_level,
               condition_score,
-              image,
+              image
             )
           ''')
           .eq('user_id', userId)

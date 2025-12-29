@@ -110,6 +110,7 @@ class _ActiveRentalScreenState extends State<ActiveRentalScreen> {
                     VerticalSpacer(32),
                     // Countdown Timer Card
                     Container(
+                      width: double.infinity,
                       padding: EdgeInsets.all(24.w),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
