@@ -185,9 +185,7 @@ class BikeProfileScreen extends StatelessWidget {
                       ? () => _handleRentBike(context, bike)
                       : null,
                   child: Text(
-                    bike.isAvailable
-                        ? 'Rent This Bike'
-                        : 'Not Available',
+                    bike.isAvailable ? 'Rent This Bike' : 'Not Available',
                     style: AppStyle.styleSemiBold16.copyWith(
                       color: Colors.white,
                     ),
@@ -202,8 +200,8 @@ class BikeProfileScreen extends StatelessWidget {
   }
 
   Future<void> _handleRentBike(BuildContext context, BikeModel bike) async {
-    final rentalProvider = context.read<RentalProvider>();
     final authProvider = context.read<AuthProvider>();
+    final rentalProvider = context.read<RentalProvider>();
     final user = authProvider.currentUser;
 
     if (user == null) {
@@ -220,21 +218,8 @@ class BikeProfileScreen extends StatelessWidget {
       return;
     }
 
-    try {
-      await rentalProvider.startRental(bike, user.id);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bike rented successfully!')),
-        );
-        GoRouter.of(context).push(AppRouter.activeRental);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-    }
+    // Navigate to duration selection screen
+    GoRouter.of(context).push(AppRouter.rentalDuration, extra: bike);
   }
 }
 

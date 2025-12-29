@@ -53,6 +53,7 @@ class _ActiveRentalScreenState extends State<ActiveRentalScreen> {
 
     final duration = rentalProvider.getCurrentRentalDuration();
     final currentCost = rentalProvider.getCurrentCost();
+    final remainingTime = rental.remainingTime;
 
     return Scaffold(
       appBar: AppBar(
@@ -107,31 +108,113 @@ class _ActiveRentalScreenState extends State<ActiveRentalScreen> {
                       ),
                     ),
                     VerticalSpacer(32),
-                    // Timer Card
+                    // Countdown Timer Card
                     Container(
                       padding: EdgeInsets.all(24.w),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColor.primary, AppColor.secondary],
+                        gradient: LinearGradient(
+                          colors: remainingTime.isNegative
+                              ? [Colors.red.shade600, Colors.red.shade800]
+                              : [AppColor.primary, AppColor.secondary],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                (remainingTime.isNegative
+                                        ? Colors.red
+                                        : AppColor.primary)
+                                    .withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         children: [
                           Text(
-                            'Rental Duration',
+                            remainingTime.isNegative
+                                ? 'TIME EXCEEDED!'
+                                : 'Time Remaining',
                             style: AppStyle.styleMedium14.copyWith(
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
                           VerticalSpacer(12),
                           Text(
-                            _formatDuration(duration),
+                            _formatDuration(remainingTime.abs()),
                             style: AppStyle.styleBold28.copyWith(
                               color: Colors.white,
+                              fontSize: 36.sp,
                             ),
+                          ),
+                          if (remainingTime.isNegative) ...[
+                            VerticalSpacer(8),
+                            Text(
+                              'Extra charges apply',
+                              style: AppStyle.styleMedium12.copyWith(
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    VerticalSpacer(24),
+                    // Elapsed Time Card
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color: AppColor.greyDD.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: AppColor.greyDD, width: 1),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.timer_outlined,
+                                color: AppColor.primary,
+                                size: 24.w,
+                              ),
+                              HorizontalSpacer(12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Elapsed Time',
+                                    style: AppStyle.styleRegular12.copyWith(
+                                      color: AppColor.lightGray,
+                                    ),
+                                  ),
+                                  VerticalSpacer(4),
+                                  Text(
+                                    _formatDuration(duration),
+                                    style: AppStyle.styleSemiBold16,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Planned Duration',
+                                style: AppStyle.styleRegular12.copyWith(
+                                  color: AppColor.lightGray,
+                                ),
+                              ),
+                              VerticalSpacer(4),
+                              Text(
+                                '${rental.durationMinutes} min',
+                                style: AppStyle.styleSemiBold16,
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -146,7 +229,7 @@ class _ActiveRentalScreenState extends State<ActiveRentalScreen> {
                     VerticalSpacer(16),
                     _InfoCard(
                       title: 'Price per Hour',
-                      value: '\$5.00',
+                      value: '\$${rental.pricePerHour.toStringAsFixed(2)}',
                       icon: Icons.price_change_outlined,
                     ),
                     VerticalSpacer(16),

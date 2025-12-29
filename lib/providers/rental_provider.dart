@@ -15,7 +15,12 @@ class RentalProvider extends ChangeNotifier {
   bool get hasActiveRental => _activeRental != null;
 
   // Start a new rental
-  Future<void> startRental(BikeModel bike, String userId) async {
+  Future<void> startRental(
+    BikeModel bike,
+    String userId, {
+    required int durationMinutes,
+    double pricePerHour = 5.0,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -23,12 +28,18 @@ class RentalProvider extends ChangeNotifier {
     try {
       // TODO: Implement API call to start rental
       // For now, create a mock rental
+      final startTime = DateTime.now();
+      final plannedEndTime = startTime.add(Duration(minutes: durationMinutes));
+
       final rental = RentalModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: userId,
         bikeId: bike.id,
         bike: bike,
-        startTime: DateTime.now(),
+        startTime: startTime,
+        durationMinutes: durationMinutes,
+        plannedEndTime: plannedEndTime,
+        pricePerHour: pricePerHour,
         status: RentalStatus.active,
         startLocation: bike.stationId ?? 'Unknown',
         createdAt: DateTime.now(),
@@ -57,11 +68,9 @@ class RentalProvider extends ChangeNotifier {
     try {
       // TODO: Implement API call to end rental
       final endTime = DateTime.now();
-      final duration = endTime.difference(_activeRental!.startTime).inMinutes;
 
       final completedRental = _activeRental!.copyWith(
         endTime: endTime,
-        duration: duration,
         totalCost: totalCost,
         status: RentalStatus.completed,
         updatedAt: endTime,
@@ -106,9 +115,7 @@ class RentalProvider extends ChangeNotifier {
   // Calculate current cost
   double getCurrentCost() {
     if (_activeRental == null || _activeRental!.bike == null) return 0.0;
-    // Default price per hour is 5.0
-    const double pricePerHour = 5.0;
-    return _activeRental!.calculateCurrentCost(pricePerHour);
+    return _activeRental!.calculateCurrentCost();
   }
 
   void clearError() {

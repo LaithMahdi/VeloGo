@@ -7,7 +7,9 @@ class RentalModel {
   final BikeModel? bike;
   final DateTime startTime;
   final DateTime? endTime;
-  final int? duration; // in minutes
+  final int durationMinutes; // in minutes
+  final DateTime plannedEndTime;
+  final double pricePerHour;
   final double? totalCost;
   final RentalStatus status;
   final String? startLocation;
@@ -22,7 +24,9 @@ class RentalModel {
     this.bike,
     required this.startTime,
     this.endTime,
-    this.duration,
+    required this.durationMinutes,
+    required this.plannedEndTime,
+    this.pricePerHour = 5.0,
     this.totalCost,
     required this.status,
     this.startLocation,
@@ -36,11 +40,21 @@ class RentalModel {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       bikeId: json['bike_id'] as String,
-      bike: json['bike'] != null ? BikeModel.fromJson(json['bike'] as Map<String, dynamic>) : null,
+      bike: json['bike'] != null
+          ? BikeModel.fromJson(json['bike'] as Map<String, dynamic>)
+          : null,
       startTime: DateTime.parse(json['start_time'] as String),
-      endTime: json['end_time'] != null ? DateTime.parse(json['end_time'] as String) : null,
-      duration: json['duration'] as int?,
-      totalCost: json['total_cost'] != null ? (json['total_cost'] as num).toDouble() : null,
+      endTime: json['end_time'] != null
+          ? DateTime.parse(json['end_time'] as String)
+          : null,
+      durationMinutes: json['duration_minutes'] as int,
+      plannedEndTime: DateTime.parse(json['planned_end_time'] as String),
+      pricePerHour: json['price_per_hour'] != null
+          ? (json['price_per_hour'] as num).toDouble()
+          : 5.0,
+      totalCost: json['total_cost'] != null
+          ? (json['total_cost'] as num).toDouble()
+          : null,
       status: RentalStatus.fromString(json['status'] as String),
       startLocation: json['start_location'] as String?,
       endLocation: json['end_location'] as String?,
@@ -57,7 +71,9 @@ class RentalModel {
       'bike': bike?.toJson(),
       'start_time': startTime.toIso8601String(),
       'end_time': endTime?.toIso8601String(),
-      'duration': duration,
+      'duration_minutes': durationMinutes,
+      'planned_end_time': plannedEndTime.toIso8601String(),
+      'price_per_hour': pricePerHour,
       'total_cost': totalCost,
       'status': status.value,
       'start_location': startLocation,
@@ -74,7 +90,9 @@ class RentalModel {
     BikeModel? bike,
     DateTime? startTime,
     DateTime? endTime,
-    int? duration,
+    int? durationMinutes,
+    DateTime? plannedEndTime,
+    double? pricePerHour,
     double? totalCost,
     RentalStatus? status,
     String? startLocation,
@@ -89,7 +107,9 @@ class RentalModel {
       bike: bike ?? this.bike,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
-      duration: duration ?? this.duration,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      plannedEndTime: plannedEndTime ?? this.plannedEndTime,
+      pricePerHour: pricePerHour ?? this.pricePerHour,
       totalCost: totalCost ?? this.totalCost,
       status: status ?? this.status,
       startLocation: startLocation ?? this.startLocation,
@@ -102,22 +122,30 @@ class RentalModel {
   bool get isActive => status == RentalStatus.active;
 
   String get durationFormatted {
-    if (duration == null) return '0 min';
-    
-    final hours = duration! ~/ 60;
-    final minutes = duration! % 60;
-    
+    final hours = durationMinutes ~/ 60;
+    final minutes = durationMinutes % 60;
+
     if (hours > 0) {
       return '$hours hr $minutes min';
     }
     return '$minutes min';
   }
 
-  double calculateCurrentCost(double pricePerHour) {
+  Duration get remainingTime {
+    if (endTime != null) return Duration.zero;
+    final remaining = plannedEndTime.difference(DateTime.now());
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
+  double get estimatedCost {
+    return (durationMinutes / 60) * pricePerHour;
+  }
+
+  double calculateCurrentCost() {
     if (endTime != null && totalCost != null) {
       return totalCost!;
     }
-    
+
     final currentDuration = DateTime.now().difference(startTime).inMinutes;
     return (currentDuration / 60) * pricePerHour;
   }

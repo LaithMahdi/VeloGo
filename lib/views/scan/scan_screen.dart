@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../../core/constant/app_color.dart';
 import '../../core/constant/app_style.dart';
@@ -16,36 +17,48 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  final TextEditingController _qrCodeController = TextEditingController();
-  bool _isScanning = false;
+  MobileScannerController cameraController = MobileScannerController();
+  bool _isProcessing = false;
 
   @override
   void dispose() {
-    _qrCodeController.dispose();
+    cameraController.dispose();
     super.dispose();
   }
 
-  Future<void> _simulateScan() async {
-    if (_qrCodeController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a bike ID')));
-      return;
-    }
+  Future<void> _onDetect(BarcodeCapture capture) async {
+    if (_isProcessing) return;
 
-    setState(() => _isScanning = true);
+    final List<Barcode> barcodes = capture.barcodes;
+    if (barcodes.isEmpty) return;
 
-    final bikeProvider = context.read<BikeProvider>();
-    final bike = await bikeProvider.getBikeByQRCode(_qrCodeController.text);
+    final String? qrCode = barcodes.first.rawValue;
+    if (qrCode == null || qrCode.isEmpty) return;
 
-    setState(() => _isScanning = false);
+    setState(() => _isProcessing = true);
 
-    if (bike != null && mounted) {
-      GoRouter.of(context).push(AppRouter.bikeProfile);
-    } else if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Bike not found')));
+    try {
+      final bikeProvider = context.read<BikeProvider>();
+      final bike = await bikeProvider.getBikeByQRCode(qrCode);
+
+      if (bike != null && mounted) {
+        await cameraController.stop();
+        GoRouter.of(context).push(AppRouter.bikeProfile);
+      } else if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Bike not found')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 
@@ -54,104 +67,55 @@ class _ScanScreenState extends State<ScanScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Scan Bike',
+          'Scan Bike QR Code',
           style: AppStyle.styleSemiBold20.copyWith(color: Colors.white),
         ),
         backgroundColor: AppColor.primary,
         elevation: 0,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.qr_code_scanner, size: 120.w, color: AppColor.primary),
-              VerticalSpacer(32),
-              Text(
-                'Scan QR Code',
-                style: AppStyle.styleBold24,
-                textAlign: TextAlign.center,
-              ),
-              VerticalSpacer(12),
-              Text(
-                'Point your camera at the bike\'s QR code to start renting',
-                style: AppStyle.styleRegular14.copyWith(
-                  color: AppColor.lightGray,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              VerticalSpacer(40),
-              // Simulated QR Scanner (for demo purposes)
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: AppColor.background,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: AppColor.greyDD),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Demo Mode: Enter Bike ID',
-                      style: AppStyle.styleMedium14.copyWith(
-                        color: AppColor.lightGray,
-                      ),
-                    ),
-                    VerticalSpacer(12),
-                    TextField(
-                      controller: _qrCodeController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter bike ID (e.g., BIKE-001)',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 12.h,
-                        ),
-                      ),
-                    ),
-                    VerticalSpacer(16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50.h,
-                      child: ElevatedButton(
-                        onPressed: _isScanning ? null : _simulateScan,
-                        child: _isScanning
-                            ? SizedBox(
-                                height: 20.h,
-                                width: 20.w,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            : Text(
-                                'Scan Bike',
-                                style: AppStyle.styleSemiBold16.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              VerticalSpacer(24),
-              Text(
-                'Note: In production, this would use the camera to scan actual QR codes',
-                style: AppStyle.styleRegular12.copyWith(
-                  color: AppColor.lightGray,
-                  fontStyle: FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.flash_off, color: Colors.white),
+            onPressed: () => cameraController.toggleTorch(),
           ),
-        ),
+          IconButton(
+            icon: const Icon(Icons.cameraswitch, color: Colors.white),
+            onPressed: () => cameraController.switchCamera(),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          MobileScanner(controller: cameraController, onDetect: _onDetect),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: EdgeInsets.all(24.w),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                ),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Point camera at bike QR code',
+                    style: AppStyle.styleSemiBold16.copyWith(
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  VerticalSpacer(8),
+                  if (_isProcessing)
+                    const CircularProgressIndicator(color: Colors.white),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
