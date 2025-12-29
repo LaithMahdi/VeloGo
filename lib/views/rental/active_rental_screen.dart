@@ -357,18 +357,12 @@ class _ActiveRentalScreenState extends State<ActiveRentalScreen> {
     if (confirmed != true) return;
 
     try {
-      await rentalProvider.endRental(totalCost);
+      // End rental - the station ID should be the bike's current station
+      final stationId = rentalProvider.activeRental?.bike?.stationId ?? '';
+      await rentalProvider.endRental(stationId);
 
-      // Update user balance
-      if (user != null) {
-        final newBalance = user.balance - totalCost;
-        final newTotalRentals = user.totalRentals + 1;
-        final updatedUser = user.copyWith(
-          balance: newBalance,
-          totalRentals: newTotalRentals,
-        );
-        authProvider.updateCurrentUser(updatedUser);
-      }
+      // Refresh user data to get updated balance and total rentals
+      await authProvider.refreshUser();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

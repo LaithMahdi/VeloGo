@@ -17,22 +17,16 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // Initialize auth and listen to auth state changes
-  void _initializeAuth() {
-    _currentUser = _authService.getCurrentUser();
+  void _initializeAuth() async {
+    _currentUser = await _authService.getCurrentUser();
     _isLoading = false;
     notifyListeners();
 
     // Listen to auth state changes
-    _authService.authStateChanges.listen((authState) {
+    _authService.authStateChanges.listen((authState) async {
       final user = authState.session?.user;
       if (user != null) {
-        _currentUser = UserModel(
-          id: user.id,
-          email: user.email ?? '',
-          fullName: user.userMetadata?['full_name'] ?? '',
-          phoneNumber: user.userMetadata?['phone_number'] ?? '',
-          createdAt: DateTime.now(),
-        );
+        _currentUser = await _authService.getCurrentUser();
       } else {
         _currentUser = null;
       }
@@ -66,7 +60,7 @@ class AuthProvider extends ChangeNotifier {
 
   // Refresh current user
   Future<void> refreshUser() async {
-    _currentUser = _authService.getCurrentUser();
+    _currentUser = await _authService.getCurrentUser();
     notifyListeners();
   }
 }

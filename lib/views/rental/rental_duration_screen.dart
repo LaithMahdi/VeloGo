@@ -292,15 +292,6 @@ class _RentalDurationScreenState extends State<RentalDurationScreen> {
       return;
     }
 
-    if (user.balance < _totalCost) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Insufficient balance. Please add funds to continue.'),
-        ),
-      );
-      return;
-    }
-
     try {
       await rentalProvider.startRental(
         widget.bike,

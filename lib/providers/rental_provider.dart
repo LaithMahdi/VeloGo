@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../data/model/rental_model.dart';
 import '../data/model/bike_model.dart';
+import '../data/service/rental_service.dart';
 
 class RentalProvider extends ChangeNotifier {
+  final RentalService _rentalService = RentalService();
   RentalModel? _activeRental;
   final List<RentalModel> _rentalHistory = [];
   bool _isLoading = false;
@@ -26,24 +28,12 @@ class RentalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement API call to start rental
-      // For now, create a mock rental
-      final startTime = DateTime.now();
-      final plannedEndTime = startTime.add(Duration(minutes: durationMinutes));
-
-      final rental = RentalModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      // Call Supabase to insert rental in database
+      final rental = await _rentalService.startRental(
         userId: userId,
         bikeId: bike.id,
-        bike: bike,
-        startTime: startTime,
         durationMinutes: durationMinutes,
-        plannedEndTime: plannedEndTime,
         pricePerHour: pricePerHour,
-        status: RentalStatus.active,
-        startLocation: bike.stationId ?? 'Unknown',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
       );
 
       _activeRental = rental;
@@ -58,7 +48,7 @@ class RentalProvider extends ChangeNotifier {
   }
 
   // End the active rental
-  Future<void> endRental(double totalCost) async {
+  Future<void> endRental(String stationId) async {
     if (_activeRental == null) return;
 
     _isLoading = true;
@@ -66,14 +56,10 @@ class RentalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement API call to end rental
-      final endTime = DateTime.now();
-
-      final completedRental = _activeRental!.copyWith(
-        endTime: endTime,
-        totalCost: totalCost,
-        status: RentalStatus.completed,
-        updatedAt: endTime,
+      // Call Supabase to complete rental in database
+      final completedRental = await _rentalService.completeRental(
+        rentalId: _activeRental!.id,
+        stationId: stationId,
       );
 
       _rentalHistory.insert(0, completedRental);
@@ -95,13 +81,26 @@ class RentalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement API call to fetch rental history
-      // For now, use existing history
+      // Fetch rental history from database
+      final history = await _rentalService.getRentalHistory(userId);
+      _rentalHistory.clear();
+      _rentalHistory.addAll(history);
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Fetch active rental
+  Future<void> fetchActiveRental(String userId) async {
+    try {
+      _activeRental = await _rentalService.getActiveRental(userId);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
       notifyListeners();
     }
   }

@@ -8,6 +8,7 @@ import '../../core/constant/app_style.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/bike_provider.dart';
 import '../../providers/rental_provider.dart';
+import '../../providers/stats_provider.dart';
 import '../../shared/spacer.dart';
 import 'widgets/active_rental_card.dart';
 import 'widgets/home_empty_station.dart';
@@ -27,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BikeProvider>().fetchNearbyStations();
+      context.read<StatsProvider>().fetchAllStats();
     });
   }
 
@@ -35,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final authProvider = context.watch<AuthProvider>();
     final bikeProvider = context.watch<BikeProvider>();
     final rentalProvider = context.watch<RentalProvider>();
+    final statsProvider = context.watch<StatsProvider>();
     final user = authProvider.currentUser;
     final activeRental = rentalProvider.activeRental;
 
@@ -49,15 +52,23 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await bikeProvider.fetchNearbyStations();
+          await Future.wait([
+            bikeProvider.fetchNearbyStations(),
+            statsProvider.fetchAllStats(),
+          ]);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section with Gradient
-              HomeHeaderAppbar(user: user),
+              HomeHeaderAppbar(
+                user: user,
+                totalProfiles: statsProvider.totalProfiles,
+                totalBalance: statsProvider.totalBalance,
+                totalRentals: statsProvider.totalRentals,
+                isLoadingStats: statsProvider.isLoading,
+              ),
 
               Padding(
                 padding: EdgeInsets.all(24.w),

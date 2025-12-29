@@ -80,11 +80,26 @@ class AuthService {
         // Try to get user profile
         final profile = await _getUserProfile(response.user!.id);
 
+        if (profile != null) {
+          return UserModel.fromJson({
+            'id': response.user!.id,
+            'email': response.user!.email ?? email,
+            'full_name': profile['full_name'],
+            'phone_number': profile['phone_number'],
+            'avatar_url': profile['avatar_url'],
+            'balance': profile['balance'],
+            'total_rentals': profile['total_rentals'],
+            'created_at':
+                profile['created_at'] ?? DateTime.now().toIso8601String(),
+            'last_sign_in_at': response.user!.lastSignInAt,
+          });
+        }
+
         return UserModel(
           id: response.user!.id,
           email: response.user!.email ?? email,
-          fullName: profile?['full_name'] ?? '',
-          phoneNumber: profile?['phone_number'] ?? '',
+          fullName: '',
+          phoneNumber: '',
           createdAt: DateTime.now(),
         );
       }
@@ -108,12 +123,7 @@ class AuthService {
           .eq('id', userId)
           .single();
 
-      if (response['error'] != null) {
-        debugPrint('❌ Error fetching user profile: ${response['error']}');
-        return null;
-      }
-
-      return response['data'] as Map<String, dynamic>?;
+      return response;
     } catch (e) {
       debugPrint('❌ Error fetching user profile: $e');
       return null;
@@ -156,17 +166,47 @@ class AuthService {
     }
   }
 
-  // Get current user
-  UserModel? getCurrentUser() {
+  // Get current user with profile data
+  Future<UserModel?> getCurrentUser() async {
     final user = _supabaseService.currentUser;
     if (user != null) {
-      return UserModel(
-        id: user.id,
-        email: user.email ?? '',
-        fullName: user.userMetadata?['full_name'] ?? '',
-        phoneNumber: user.userMetadata?['phone_number'] ?? '',
-        createdAt: DateTime.now(),
-      );
+      try {
+        // Fetch profile data from profiles table
+        final profile = await _getUserProfile(user.id);
+
+        if (profile != null) {
+          return UserModel.fromJson({
+            'id': user.id,
+            'email': user.email ?? '',
+            'full_name': profile['full_name'],
+            'phone_number': profile['phone_number'],
+            'avatar_url': profile['avatar_url'],
+            'balance': profile['balance'],
+            'total_rentals': profile['total_rentals'],
+            'created_at':
+                profile['created_at'] ?? DateTime.now().toIso8601String(),
+            'last_sign_in_at': user.lastSignInAt,
+          });
+        }
+
+        // Fallback if profile not found
+        return UserModel(
+          id: user.id,
+          email: user.email ?? '',
+          fullName: user.userMetadata?['full_name'] ?? '',
+          phoneNumber: user.userMetadata?['phone_number'] ?? '',
+          createdAt: DateTime.now(),
+        );
+      } catch (e) {
+        debugPrint('❌ Error fetching current user profile: $e');
+        return UserModel(
+          id: user.id,
+          email: user.email ?? '',
+          fullName: user.userMetadata?['full_name'] ?? '',
+          phoneNumber: user.userMetadata?['phone_number'] ?? '',
+          createdAt: DateTime.now(),
+        );
+      }
     }
     return null;
   }

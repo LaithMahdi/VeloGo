@@ -8,9 +8,20 @@ import '../../../shared/spacer.dart';
 import 'stat_card.dart';
 
 class HomeHeaderAppbar extends StatelessWidget {
-  const HomeHeaderAppbar({super.key, required this.user});
+  const HomeHeaderAppbar({
+    super.key,
+    required this.user,
+    required this.totalProfiles,
+    required this.totalBalance,
+    required this.totalRentals,
+    required this.isLoadingStats,
+  });
 
   final UserModel? user;
+  final int totalProfiles;
+  final double totalBalance;
+  final int totalRentals;
+  final bool isLoadingStats;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +58,7 @@ class HomeHeaderAppbar extends StatelessWidget {
                 child: StatCard(
                   icon: Icons.account_balance_wallet,
                   title: 'Balance',
-                  value: '\$${user?.balance.toStringAsFixed(2) ?? '0.00'}',
+                  value: '\$${totalBalance.toStringAsFixed(0)}',
                   color: Colors.white,
                 ),
               ),
@@ -56,7 +67,7 @@ class HomeHeaderAppbar extends StatelessWidget {
                 child: StatCard(
                   icon: Icons.pedal_bike,
                   title: 'Total Rentals',
-                  value: '${user?.totalRentals ?? 0}',
+                  value: '$totalRentals',
                   color: Colors.white,
                 ),
               ),

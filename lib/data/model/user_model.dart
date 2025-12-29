@@ -22,16 +22,32 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Helper function to safely convert to String
+    String? toString(dynamic value) {
+      if (value == null) return null;
+      if (value is String) return value;
+      return value.toString();
+    }
+
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String,
-      fullName: json['user_metadata']?['full_name'] as String?,
-      phoneNumber: json['user_metadata']?['phone_number'] as String?,
-      avatarUrl: json['user_metadata']?['avatar_url'] as String?,
-      balance: json['user_metadata']?['balance'] != null
-          ? (json['user_metadata']['balance'] as num).toDouble()
-          : 0.0,
-      totalRentals: json['user_metadata']?['total_rentals'] as int? ?? 0,
+      fullName:
+          toString(json['full_name']) ??
+          toString(json['user_metadata']?['full_name']),
+      phoneNumber:
+          toString(json['phone_number']) ??
+          toString(json['user_metadata']?['phone_number']),
+      avatarUrl:
+          toString(json['avatar_url']) ??
+          toString(json['user_metadata']?['avatar_url']),
+      balance: json['balance'] != null
+          ? (json['balance'] as num).toDouble()
+          : (json['user_metadata']?['balance'] as num?)?.toDouble() ?? 0.0,
+      totalRentals:
+          json['total_rentals'] as int? ??
+          json['user_metadata']?['total_rentals'] as int? ??
+          0,
       createdAt: DateTime.parse(json['created_at'] as String),
       lastSignInAt: json['last_sign_in_at'] != null
           ? DateTime.parse(json['last_sign_in_at'] as String)

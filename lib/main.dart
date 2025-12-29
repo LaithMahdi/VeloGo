@@ -14,6 +14,7 @@ import 'providers/signup_provider.dart';
 import 'providers/bike_provider.dart';
 import 'providers/rental_provider.dart';
 import 'providers/profile_provider.dart';
+import 'providers/stats_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
             ChangeNotifierProvider(create: (_) => BikeProvider()),
             ChangeNotifierProvider(create: (_) => RentalProvider()),
             ChangeNotifierProvider(create: (_) => ProfileProvider()),
+            ChangeNotifierProvider(create: (_) => StatsProvider()),
           ],
           child: MaterialApp.router(
             title: Config.appName,
