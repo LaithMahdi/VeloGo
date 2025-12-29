@@ -181,11 +181,11 @@ class BikeProfileScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 50.h,
                 child: ElevatedButton(
-                  onPressed: bike.status == BikeStatus.available
+                  onPressed: bike.isAvailable
                       ? () => _handleRentBike(context, bike)
                       : null,
                   child: Text(
-                    bike.status == BikeStatus.available
+                    bike.isAvailable
                         ? 'Rent This Bike'
                         : 'Not Available',
                     style: AppStyle.styleSemiBold16.copyWith(

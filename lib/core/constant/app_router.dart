@@ -5,6 +5,8 @@ import '../../views/navigation/main_navigation_screen.dart';
 import '../../views/bike/bike_profile_screen.dart';
 import '../../views/rental/active_rental_screen.dart';
 import '../../views/rental/rental_history_screen.dart';
+import '../../views/station/station_detail_screen.dart';
+import '../../data/model/station_model.dart';
 import '../config.dart';
 import '../service/storage_service.dart';
 import '../service/supabase_service.dart';
@@ -22,6 +24,7 @@ abstract class AppRouter {
   static const String bikeProfile = '/bike-profile';
   static const String activeRental = '/active-rental';
   static const String rentalHistory = '/rental-history';
+  static const String stationDetail = '/station-detail';
 
   static final router = GoRouter(
     initialLocation: splash,
@@ -82,6 +85,13 @@ abstract class AppRouter {
       GoRoute(
         path: rentalHistory,
         builder: (context, state) => const RentalHistoryScreen(),
+      ),
+      GoRoute(
+        path: stationDetail,
+        builder: (context, state) {
+          final station = state.extra as StationModel;
+          return StationDetailScreen(station: station);
+        },
       ),
     ],
   );

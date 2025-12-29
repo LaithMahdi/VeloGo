@@ -62,7 +62,7 @@ class BikeModel {
           : null,
       conditionScore: json['condition_score'] as int?,
       notes: json['notes'] as String?,
-      imageUrl: json['image_url'] as String?,
+      imageUrl: json['image'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -85,7 +85,7 @@ class BikeModel {
       'purchase_date': purchaseDate?.toIso8601String(),
       'condition_score': conditionScore,
       'notes': notes,
-      'image_url': imageUrl,
+      'image': imageUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
