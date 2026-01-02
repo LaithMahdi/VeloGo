@@ -110,7 +110,21 @@
 
 ## 📸 Screenshots
 
-> Add your app screenshots here
+<div align="center">
+  <img src="assets/capture/home_screen.png" alt="Home Screen" width="250"/>
+  <img src="assets/capture/bike_detail_screen.png" alt="Bike Detail" width="250"/>
+  <img src="assets/capture/scan_qr_screen.png" alt="QR Scanner" width="250"/>
+</div>
+
+<div align="center">
+  <img src="assets/capture/station_detail_screen.png" alt="Station Detail" width="250"/>
+  <img src="assets/capture/settings_screen.png" alt="Settings" width="250"/>
+  <img src="assets/capture/login_screen.png" alt="Login" width="250"/>
+</div>
+
+<div align="center">
+  <img src="assets/capture/register_screen.png" alt="Register" width="250"/>
+</div>
 
 ---
 
@@ -403,9 +417,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-**Project Maintainer**: Mahdi
-
-**Project Link**: [https://github.com/yourusername/velogo](https://github.com/yourusername/velogo)
+**Project Maintainer**: Laith Mahdi
 
 ---
 
