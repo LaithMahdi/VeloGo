@@ -8,10 +8,10 @@ import 'auth_provider.dart';
 
 class LoginProvider extends ChangeNotifier {
   final TextEditingController _email = TextEditingController(
-    text: "mahdilaith380@gmail.com",
+    text: "laith@gmail.com",
   );
   final TextEditingController _password = TextEditingController(
-    text: "12345678",
+    text: "123456789",
   );
   final AuthService _authService = AuthService();
 

@@ -49,6 +49,13 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             routerConfig: AppRouter.router,
             debugShowCheckedModeBanner: false,
+            // builder: (context, child) {
+            //   final padding = MediaQuery.of(context).padding;
+            //   return Padding(
+            //     padding: EdgeInsets.only(bottom: padding.bottom),
+            //     child: child!,
+            //   );
+            // },
           ),
         );
       },
